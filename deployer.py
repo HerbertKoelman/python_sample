@@ -1,8 +1,16 @@
 import utils, argparse, argv_argc, sys
 
 if __name__ == '__main__':  # nécessaire que si on veut eviter que ce code soit systématiquement exécuté. Que ce soit comme import ou programme
+
+    parser = argparse.ArgumentParser(
+        prefix_chars='-',
+        description='deploy/install the requirements found in each given YAML file'
+    )
+
     try:
-        args = argv_argc.deployment('deploy/install the requirements found in each given YAML file')
+
+        args = argv_argc.deployment(parser)
+
         print("deploy artifacts found in {} here {}".format(args.files, args.install_dir))
 
         if args.install_dir is not None and args.force:

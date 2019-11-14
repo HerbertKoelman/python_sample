@@ -1,16 +1,11 @@
 import argparse, os, sys
 
-def deployment(description):
+def deployment(parser):
     """
     Parse commande line arguments used to deploy artifacts.
     :param description: program description string.
     :return: found arguments.
     """
-
-    parser = argparse.ArgumentParser(
-        prefix_chars='-',
-        description=description
-    )
 
     parser.add_argument("--force", dest="force",
                         action='store_true',

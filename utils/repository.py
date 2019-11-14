@@ -5,25 +5,38 @@ import utils
 import shutil
 
 # singleton
-PACKAGES_HOME = '/share/modules'
+PACKAGES_HOME_PATH = os.getenv('PACKAGES_HOME_PATH', '/share/modules').split(':')
 
 def install_package(requirement, arch, here):
-    print("installing '{}' for '{}' here '{}'".format(requirement, arch, here))
     package = utils.Package(requirement, arch)
 
-    archive_file = os.path.join(PACKAGES_HOME, package.archive())
-    assert os.path.isfile(archive_file), "archive file '{}' not found.".format(archive_file)
+    for packages_home in PACKAGES_HOME_PATH:
+        try:
+            archive_file = os.path.join(packages_home, package.archive())
+            assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
+                archive_file,
+                packages_home)
 
-    digest_file  = os.path.join(PACKAGES_HOME, package.archive_digest())
-    assert os.path.isfile(digest_file), "archive digest file '{}' not found.".format(digest_file)
+            digest_file  = os.path.join(packages_home, package.archive_digest())
+            assert os.path.isfile(digest_file), "archive digest file '{}' not found here {}.".format(
+                digest_file,
+                packages_home)
 
-    check_integrity(archive_file, digest_file)
+            check_integrity(archive_file, digest_file)
 
-    with tarfile.open(archive_file, "r:gz") as archive_reader:
-        archive_reader.extractall(path=here)
+            with tarfile.open(archive_file, "r:gz") as archive_reader:
+                archive_reader.extractall(path=here)
+
+            print("installed '{}' found here '{}' for '{}', here '{}'".format(package.artifact.id(),
+                                                                              packages_home,
+                                                                              arch,
+                                                                              here))
+
+        except AssertionError as err:
+            print(err)
 
 def remove_all_artifacts_found(here):
-    shutil.rmtree(here)
+    shutil.rmtree(here, ignore_errors=True)
 
 def check_integrity(archive_file, digest_file):
 
