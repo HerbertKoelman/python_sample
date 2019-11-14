@@ -1,7 +1,7 @@
 ---
 # This is a sample requirement files
 requires:
-  - common-qnx-1.2.3
+  - common-qnx-2.1.0-snapshot
   - ipcm-api-qnx-2.2.3
   - bsp-qnx-3.2.3
   - double-qnx-1.0.0

@@ -4,20 +4,25 @@ class Artifact {
   {static} KNOWN_BUILD_TYPES: BUILD_TYPES
   {static} KNOWN_OS: OS
   --
-  package: Packaging
+  +name: str
+  +version: semantic_version.Version
+  +source_arch: str
+  +description: str
+  +package: Packaging
   --
-  str id ()
-  str summary()
-  str __str__()
+  +str id ()
+  +str summary()
+  +str __str__()
 }
 
 class Packaging {
-  artifact: Artifact
-  archive: str
-  archive_digest: str
+  +artifact: Artifact
+  +target_arch: str
   --
-  str type()
-  str description()
+  +str archive())
+  +str archive_digest())
+  +str type()
+  +str description()
 }
 
 class Packages{

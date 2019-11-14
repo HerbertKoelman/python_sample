@@ -1,0 +1,2 @@
+ipcm-api-qnx-1.42.0
+common-qnx-2.0.1

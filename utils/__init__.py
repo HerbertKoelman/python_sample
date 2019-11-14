@@ -1,5 +1,6 @@
 # __all__ = ['deploy','artefacts']
 
-from .deploy       import *
-from .artifacts    import *
+from .artifact    import *
 from .requirements import *
+from .repository   import *
+from .package      import *

@@ -1,4 +1,4 @@
-import platform, os, sys, semantic_version
+import utils, platform, os, semantic_version
 
 class Artifact:
     """
@@ -10,9 +10,8 @@ class Artifact:
     """
 
     KNOWN_BUILD_TYPES = ['snapshot', 'stable']
-    KNOWN_OS          = ['qnx', 'linux', 'darwin']
 
-    def __init__(self, name: str, build_type: str = None, version = None, os: str = None, target_arch: str = None, description: str = None):
+    def __init__(self, name: str, build_type: str = None, version = None, os: str = None, source_arch: str = None, description: str = None):
         """
         Artifact description class.
 
@@ -25,7 +24,7 @@ class Artifact:
         :param build_type: does this instance represent a stable or snapshot version
         :param version: artifact's semantic vzersion number (semver)
         :param os: the OS this artifact was built for.
-        :param target_arch: the CPU this artifact was built for (x86, armv7, ...)
+        :param source_arch: the CPU this artifact was built for (x86, armv7, ...)
         :param description: a short description of what it does.
         """
         try:
@@ -34,10 +33,10 @@ class Artifact:
             self.name = name
             self.os = os
             self.description = description
-            if target_arch is None:
-                self.target_arch = platform.machine()
+            if source_arch is None:
+                self.source_arch = platform.machine()
             else:
-                self.target_arch = target_arch
+                self.source_arch = source_arch
 
             if version is None: # and build_type is None:
                 self.name, self.version, self.build_type, self.os = self.parse_artifact_description_string(name)
@@ -45,7 +44,7 @@ class Artifact:
                 self.version = semantic_version.Version(version)
                 self.build_type = build_type
 
-            self.package = Packaging(self)
+            # TODO suppress this self.package = Package(self)
 
             assert self.version is not None, "failed to set class Artefact's attribute version, initialization of Artefact {} failed".format(name)
         except ValueError as err:
@@ -101,7 +100,7 @@ class Artifact:
 
         if len(tokens) > 1:
             last_token = len(tokens) - 1
-            if tokens[ last_token ] in Artifact.KNOWN_OS:
+            if tokens[ last_token ] in utils.KNOWN_OS:
                 os = tokens[last_token]
                 tokens.pop(last_token)
 
@@ -122,7 +121,7 @@ class Artifact:
         if self.build_type == 'snapshot':
             id += "-{build_type}".format(build_type=self.build_type)
 
-        id += "-{arch}".format(arch=self.target_arch)
+        # TODO suppress this id += "-{arch}".format(arch=self.source_arch)
 
         return id
 
@@ -130,7 +129,7 @@ class Artifact:
     def summary(self):
         print("name: ", self.name)
         print("OS: ", self.os)
-        print("arch: ", self.target_arch)
+        print("arch: ", self.source_arch)
         print("version: {} ({})".format(self.version, self.build_type_display_name()))
         print("description --------------------------------------------------------")
         print(self.description)
@@ -147,7 +146,7 @@ class Artifact:
             name=self.name,
             version=self.version,
             os=self.os,
-            arch= self.target_arch,
+            arch= self.source_arch,
             build_type=self.build_type_display_name())
 
     def __eq__(self, other):
@@ -155,66 +154,3 @@ class Artifact:
             return self.id() == other
         elif isinstance(other, Artifact):
             return self.id() == other.id()
-
-
-class Packaging:
-    """
-    handles artefacts container (tar.gz)
-    """
-
-    def __init__(self, artifact: Artifact):
-        self.artifact = artifact
-
-    def archive(self):
-        return "{}.tar.gz".format(self.artifact.id())
-
-    def archive_digest(self):
-        return"{}.tar.gz.md5".format(self.artifact.id())
-
-    def type(self):
-        return "tar.gz"
-
-    def description(self):
-        return "compressed tape archive"
-
-    def __str__(self):
-        return "artifact {}:\n- {}\n- {} (digest)".format(self.artifact, self.archive(), self.archive_digest())
-
-class Packages:
-    """
-    Handles the storing of artifact packages:
-    - The default implementation uses a file system as backend
-    """
-
-    PACKAGES_INDEX = {}
-    PACKAGES_PATH  = ['/share/modules']
-
-    def __init__(self, packages_home = None):
-
-        if packages_home is None:
-            packages_home = os.getenv('PACKAGES_HOME')
-
-        if isinstance(packages_home, str):
-            PACKAGES_PATH = packages_home.split(';')
-        elif isinstance(packages_home, list):
-            PACKAGES_PATH = packages_home
-        else:
-            raise TypeError("failed to create an instance Packages, packages_home parameter can only be of type str or list")
-
-        assert len(PACKAGES_PATH) > 0 , "no valid artifact search path was found, did you set anv variable PACKAGES_HOME ?"
-
-    def regsiter(self, artifact: Artifact):
-        Packages.PACKAGES_INDEX[artifact.id()] = artifact
-
-    def deploy(self, artifact: Artifact, here):
-        print("deply", artifact)
-
-    def search_for(self, item):
-        if isinstance(item, Packaging):
-            print("Search for package: {}\nFull information\n{}".format(item.artifact.name, item))
-        if isinstance(item, Artifact):
-            print("Search for package: {}\nFull information\n{}".format(item.name, item.package))
-
-# singleton
-PACKAGES_HOME = '/share/modules'
-PACKAGES = Packages(PACKAGES_HOME)

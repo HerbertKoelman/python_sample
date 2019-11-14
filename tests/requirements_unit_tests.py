@@ -3,7 +3,7 @@ import utils
 
 class requirements_test_cases(unittest.TestCase):
     def test_load_from_yaml_file(self):
-        path_to_yaml_file = 'sample.yml'
+        path_to_yaml_file = 'tests/sample.yml'
 
         requirements = utils.load_requirements_from(path_to_yaml_file)
 
@@ -11,7 +11,7 @@ class requirements_test_cases(unittest.TestCase):
         self.assertEqual(len(requirements), 7, msg="unexpected number requirments found in '{}'".format(path_to_yaml_file))
 
         for artefact in requirements:
-            print (artefact.package)
+            print (utils.Package(artefact, 'armv7').archive())
 
 if __name__ == '__main__':
     unittest.main()
