@@ -92,8 +92,10 @@ class Artifact:
         elif version_position == (last_token - 1):
             build_type = tokens[last_token].lower()
             assert build_type in Artifact.KNOWN_BUILD_TYPES, \
-                   "in %r was found a build type %r which is not a valid value. Accepted values are %" \
-                   % (description_string, build_type, Artifact.KNOWN_BUILD_TYPES)
+                   "in '{}' was found a build type '{}'}' which is not a valid value. Accepted values are {}".format(
+                       description_string,
+                       build_type,
+                       Artifact.KNOWN_BUILD_TYPES)
 
             tokens.pop(last_token)
             tokens.pop(last_token -1)
@@ -108,6 +110,8 @@ class Artifact:
         for token in tokens:
             name += _sep + token
             _sep = seperator
+
+        assert name is not None and version is not None, "failed to parse artifact description string '{}'".format(description_string)
 
         return name, version, build_type, os
 
@@ -125,6 +129,8 @@ class Artifact:
 
         return id
 
+    def is_snapshot(self):
+        return self.build_type == 'snapshot'
 
     def summary(self):
         print("name: ", self.name)
