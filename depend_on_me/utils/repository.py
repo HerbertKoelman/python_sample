@@ -1,7 +1,7 @@
 import hashlib
 import os
 import tarfile
-import utils
+import depend_on_me
 import shutil
 import glob
 

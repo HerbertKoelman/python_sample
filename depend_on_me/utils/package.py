@@ -1,5 +1,6 @@
 import os
 import utils
+import depend_on_me
 import re
 
 KNOWN_ARCHS = ['x86', 'x86_64', 'armv7']
@@ -47,7 +48,9 @@ class Package:
         tokens = tokens[0:arch_position]
         artifact = utils.Artifact('-'.join(tokens))
 
-        assert arch is not None, "package description string doesn't mention a valid processor architecture, expected to in {}.".format(utils.KNOWN_ARCHS)
+        assert arch is not None, "package description string '{}' doesn't mention a valid processor architecture, expected to in {}.".format(
+            description_string,
+            utils.KNOWN_ARCHS)
 
         return artifact, arch
 
