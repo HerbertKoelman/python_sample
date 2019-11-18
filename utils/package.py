@@ -25,7 +25,7 @@ class Package:
 
     def parse_package_description_string(self, description_string):
 
-        assert description_string.endswith(".tar.gz"), "package description string '{}' is expected to end with {}.".format(description_string, self.type())
+        assert description_string.endswith(".tar.gz"), "package description '{}' doesn't end with '{}'.".format(description_string, self.type())
 
         description_string = re.sub("{}$".format(re.escape(self.type())), '', description_string)
 
@@ -47,7 +47,9 @@ class Package:
         tokens = tokens[0:arch_position]
         artifact = utils.Artifact('-'.join(tokens))
 
-        assert arch is not None, "package description string doesn't mention a valid processor architecture, expected to in {}.".format(utils.KNOWN_ARCHS)
+        assert arch is not None, "package description string '{}' doesn't mention a valid processor architecture, expected to in {}.".format(
+            description_string,
+            utils.KNOWN_ARCHS)
 
         return artifact, arch
 

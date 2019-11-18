@@ -28,10 +28,10 @@ class package_test_cases(unittest.TestCase):
                          msg="wrong packaging archive name for package \n{}".format(package))
 
     def test_package_copy(self):
-        utils.copy_package('./cpp-pthread-Darwin-1.11.0-x86.tar.gz', '/tmp/')
+        utils.copy_package('./tests/fixtures/cpp-pthread-Darwin-1.11.0-x86.tar.gz', '/tmp/')
         self.assertTrue(os.path.isfile('/tmp/cpp-pthread-Darwin-1.11.0-x86.tar.gz'), "expected to find artifact here '/tmp/cpp-pthread-Darwin-1.11.0-x86.tar.gz'")
         self.assertTrue(os.path.isfile('/tmp/cpp-pthread-Darwin-1.11.0-x86.tar.gz.md5'), "expected to find artifact's digest here '/tmp/cpp-pthread-Darwin-1.11.0-x86.tar.gz.md5'")
-        self.assertRaises(Exception, utils.copy_package('./cpp-pthread-Darwin-1.11.0-x86.tar.gz', '/tmp/'))
+        self.assertRaises(Exception, utils.copy_package('./tests/fixtures/cpp-pthread-Darwin-1.11.0-x86.tar.gz', '/tmp/'))
 
 if __name__ == '__main__':
     unittest.main()
