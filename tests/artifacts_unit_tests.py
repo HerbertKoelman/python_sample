@@ -28,7 +28,7 @@ class artifacts_test_cases(unittest.TestCase):
                          "common (version: 1.2.3, os: None, arch: x86_64, build type: snapshot)",
                          msg="pattern 'common-1.2.3-snapshot' init failed")
         self.assertEqual(artefact.id(), "common-1.2.3-snapshot", msg="pattern 'common-1.2.3-snapshot' returns a wrong artifact ID")
-
+        print(artefact, "--->" , artefact.version.next_major(), ", ", artefact.version.next_patch())
         artefact = utils.Artifact('common-qnx-1.2.3-SNAPSHOT')
         self.assertEqual(artefact.__str__(),
                          "common (version: 1.2.3, os: qnx, arch: x86_64, build type: snapshot)",

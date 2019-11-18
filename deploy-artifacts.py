@@ -1,4 +1,7 @@
-import utils, argparse, argv_argc, sys
+import argparse
+import argv_argc
+import sys
+import utils
 
 if __name__ == '__main__':  # nécessaire que si on veut eviter que ce code soit systématiquement exécuté. Que ce soit comme import ou programme
     """Handles the deployment of artifacts."""
@@ -23,5 +26,6 @@ if __name__ == '__main__':  # nécessaire que si on veut eviter que ce code soit
                 utils.install_package(artefact, arch=args.target_arch, here=args.install_dir )
 
     except Exception as err:
+        err.with_traceback()
         print("error: {} failed. {}".format(parser.prog, err))
         sys.exit(-99)

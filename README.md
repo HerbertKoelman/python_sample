@@ -51,8 +51,8 @@ An artifact archive uselly contains something like this:
    - bin : program files
 
 ```shell script
-$ python deployer.py -h
-usage: deployer.py [-h] [--force] --install-dir INSTALL_DIR --target-arch
+$ python deploye-artifacts.py -h
+usage: deploye-artifacts.py [-h] [--force] --install-dir INSTALL_DIR --target-arch
                    TARGET_ARCH [--packages-home PACKAGES_HOME_DIR]
                    ...
 
@@ -78,8 +78,8 @@ The *copy.py* Python program moves artifact tape archives into a target director
 then the archive is not moved. Only *snapshot* artifacts are  *ALWAYS* moved, replacing the xisting archive by the one found.
 
 ```shell script
-$ python copy.py -h
-usage: copy.py [-h] [--force] --packages-home PACKAGES_HOME_DIR ...
+$ python copy-artifact.py -h
+usage: copy-artifact.py [-h] [--force] --packages-home PACKAGES_HOME_DIR ...
 
 deploy/install the requirements found in each given YAML file
 
