@@ -1,4 +1,7 @@
-import utils, platform, os, semantic_version
+import platform
+import semantic_version
+import artifacts
+
 
 class Artifact:
     """
@@ -102,7 +105,7 @@ class Artifact:
 
         if len(tokens) > 1:
             last_token = len(tokens) - 1
-            if tokens[ last_token ] in utils.KNOWN_OS:
+            if tokens[ last_token ] in artifacts.package.KNOWN_OS:
                 os = tokens[last_token]
                 tokens.pop(last_token)
 

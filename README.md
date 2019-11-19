@@ -78,8 +78,8 @@ The *copy.py* Python program moves artifact tape archives into a target director
 then the archive is not moved. Only *snapshot* artifacts are  *ALWAYS* moved, replacing the xisting archive by the one found.
 
 ```shell script
-$ python copy-artifact.py -h
-usage: copy-artifact.py [-h] [--force] --packages-home PACKAGES_HOME_DIR ...
+$ python copy_artifacts_app.py -h
+usage: copy_artifacts_app.py [-h] [--force] --packages-home PACKAGES_HOME_DIR ...
 
 deploy/install the requirements found in each given YAML file
 
