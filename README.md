@@ -59,6 +59,7 @@ removing 'artifacts-0.1' (and everything under it)
 This package is installed with the following command:
 
 ```shell script
+$ pip install ./dist/artifacts-0.1.tar.gz
 Processing ./dist/artifacts-0.1.tar.gz
 Requirement already satisfied: PyYAML==5.1.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (5.1.2)
 Requirement already satisfied: semantic-version==2.8.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (2.8.2)
