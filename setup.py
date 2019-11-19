@@ -9,7 +9,7 @@ def requirements():
 
 setup(
     name="artifacts",
-    version="0.1",
+    version="0.1.1",
 
     packages=find_packages(include=['artifacts'],exclude=['tests','venv']),
 
