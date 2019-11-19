@@ -1,0 +1,48 @@
+@startuml
+
+class Artifact {
+  {static} KNOWN_BUILD_TYPES: BUILD_TYPES
+  {static} KNOWN_OS: OS
+  --
+  +name: str
+  +version: semantic_version.Version
+  +source_arch: str
+  +description: str
+  +package: Packaging
+  --
+  +str id ()
+  +str summary()
+  +str __str__()
+}
+
+class Packaging {
+  +artifact: Artifact
+  +target_arch: str
+  --
+  +str archive())
+  +str archive_digest())
+  +str type()
+  +str description()
+}
+
+class Packages{
+}
+
+enum BUILD_TYPES{
+stable
+snapshot
+}
+
+enum OS {
+  qnx
+  darwin
+  linux
+}
+
+Artifact "1" --- "1" Packaging
+Artifact -left-> BUILD_TYPES : uses
+Artifact -right-> OS : uses
+
+Artifact "many" ---* "1" Packages
+
+@enduml

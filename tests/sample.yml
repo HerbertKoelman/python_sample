@@ -1,0 +1,17 @@
+---
+# This is a sample requirement files
+requires:
+  - common-qnx-2.1.0-snapshot
+  - ipcm-api-qnx-2.2.3
+  - bsp-qnx-3.2.3
+  - double-qnx-1.0.0
+...
+---
+requires:
+  stable:
+    - openssl-qnx-2.2.3
+    - cpp-pthread-qnx-3.2.3
+    - double-qnx-1.0.0
+  snapshot:
+    - snapshot-lib-qnx-1.2.3
+...
