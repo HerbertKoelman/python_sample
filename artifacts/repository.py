@@ -1,16 +1,26 @@
 import hashlib
 import os
 import tarfile
-import utils
 import shutil
 import glob
+import artifacts
 
 # singleton
 PACKAGES_HOME_PATH = os.getenv('PACKAGES_HOME_PATH', '/share/modules').split(':')
 PACKAGES = {}
 
 def install_package(requirement, arch, here):
-    package = utils.Package(requirement, arch)
+    """
+    search for artifact and untar the corresponding archive file.
+
+    artifacts are search in the a list of packages home directory. The first valid occurence found is installed.
+
+    :param requirement: a package description string
+    :param arch: a valid target processor architecture (x86, ...)
+    :param here: path to the installation directory.
+    :return:
+    """
+    package = artifacts.Package(requirement, arch)
     if package.id() not in PACKAGES:
         for packages_home in PACKAGES_HOME_PATH:
             try:
@@ -51,10 +61,13 @@ def copy_package(archive, to):
     :param to: target directory.
     :return:
     """
+
+    status = False
+
     basename = os.path.basename(archive)
     dirname  = os.path.dirname(archive)
 
-    package = utils.Package(basename)
+    package = artifacts.Package(basename)
 
     source_archive        = os.path.join(dirname, package.archive())
     source_archive_digest = os.path.join(dirname, package.archive_digest())
@@ -66,25 +79,43 @@ def copy_package(archive, to):
         shutil.copy(source_archive, target_archive)
         shutil.copy(source_archive_digest, target_archive_digest)
         print ("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+        status = True
 
-    elif not package.artifact.is_snapshot() and not os.path.isfile(target_archive):
-        check_integrity(source_archive, source_archive_digest)
-        shutil.copy(source_archive, target_archive)
-        shutil.copy(source_archive_digest, target_archive_digest)
-        print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+    elif not package.artifact.is_snapshot():
+        if not os.path.isfile(target_archive):
+            check_integrity(source_archive, source_archive_digest)
+            shutil.copy(source_archive, target_archive)
+            shutil.copy(source_archive_digest, target_archive_digest)
+            print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+            status = True
 
-    else:
-        print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
-            package.id(),
-            target_archive,
-            package.artifact.id(),
-            to
-        ))
+        else:
+            print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
+                package.id(),
+                target_archive,
+                package.artifact.id(),
+                to
+            ))
+    return status
 
 def remove_all_artifacts_found(here):
+    """
+    remove recursively the given directory.
+
+    :param here: path to a directory to remove
+    :return:
+    """
     shutil.rmtree(here, ignore_errors=True)
 
 def check_integrity(archive_file, digest_file):
+    """
+    calculate a digest for the archive file and compares the result with the digest found in the digest file.
+
+    An AssertionError is thrown if the digests don't match.
+
+    :param archive_file: a compressed tape archive
+    :param digest_file: a file that contains the digest to check against
+    """
 
     with open(digest_file) as digest_file_reader:
         target_md5_digest = digest_file_reader.readline().split()[0]

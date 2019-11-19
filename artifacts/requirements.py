@@ -1,8 +1,9 @@
-import utils.artifact, yaml
+import yaml
+import artifacts
 
 def load_requirements_from(file):
     """
-    create a list utils.Artifact instances.
+    create a list artifacts.Artifact instances.
 
     :param file: a file that conains requirements
     :return: list of found utils.Artefact instances
@@ -21,30 +22,30 @@ def load_requirements_from(file):
 
 def load_yaml_reader(reader):
     documents = yaml.safe_load_all(reader)
-    artifacts = []
+    list_of_artifacts = []
     for data in documents:
         requirements = data['requires']
 
         if isinstance(requirements, list):
             for artifact in requirements:
-                if utils.Artifact(artifact) not in artifacts:
-                    artifacts.append(utils.Artifact(artifact))
+                if artifacts.Artifact(artifact) not in list_of_artifacts:
+                    list_of_artifacts.append(artifacts.Artifact(artifact))
 
         if isinstance(requirements, dict):
             for artifact in requirements['stable']:
-                if utils.Artifact(artifact) not in artifacts:
-                    artifacts.append(utils.Artifact(artifact))
+                if artifacts.Artifact(artifact) not in list_of_artifacts:
+                    list_of_artifacts.append(artifacts.Artifact(artifact))
 
             for artifact in requirements['snapshot']:
-                if utils.Artifact(artifact, build_type='snapshot') not in artifacts:
-                    artifacts.append(utils.Artifact(artifact, build_type='snapshot'))
+                if artifacts.Artifact(artifact, build_type='snapshot') not in list_of_artifacts:
+                    list_of_artifacts.append(artifacts.Artifact(artifact, build_type='snapshot'))
 
-    return artifacts
+    return list_of_artifacts
 
 
 def load_plain_text_reader(reader):
-    artifacts = []
+    list_of_artifacts = []
     for artifact in reader.readlines():
-        artifacts.append(utils.Artifact(artifact.strip(' ')))
+        list_of_artifacts.append(artifacts.Artifact(artifact.strip(' ')))
 
     return artifacts

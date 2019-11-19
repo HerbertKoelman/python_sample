@@ -1,5 +1,5 @@
 import os
-import utils
+import artifacts
 import re
 
 KNOWN_ARCHS = ['x86', 'x86_64', 'armv7']
@@ -10,11 +10,11 @@ class Package:
     handles artefacts container (tar.gz)
     """
 
-    def __init__(self, artifact: utils.Artifact, target_arch = None):
+    def __init__(self, artifact: artifacts.Artifact, target_arch = None):
 
         assert artifact is not None, "artifact is a required init argument"
 
-        if isinstance(artifact, utils.Artifact):
+        if isinstance(artifact, artifacts.Artifact):
             assert target_arch in KNOWN_ARCHS, "target architecture '{}' is not supported, failed to initialize Package class".format(target_arch)
 
         elif isinstance(artifact, str):
@@ -39,17 +39,17 @@ class Package:
         arch     = None
         arch_position = 0
         for token in tokens:
-            if token in utils.KNOWN_ARCHS:
+            if token in KNOWN_ARCHS:
                 arch = token
                 break
             arch_position += 1
 
         tokens = tokens[0:arch_position]
-        artifact = utils.Artifact('-'.join(tokens))
+        artifact = artifacts.Artifact('-'.join(tokens))
 
         assert arch is not None, "package description string '{}' doesn't mention a valid processor architecture, expected to in {}.".format(
             description_string,
-            utils.KNOWN_ARCHS)
+            KNOWN_ARCHS)
 
         return artifact, arch
 
