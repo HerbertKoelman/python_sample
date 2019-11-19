@@ -6,6 +6,9 @@ import traceback
 import artifacts
 
 def main():
+
+    exit_status = -99
+
     parser = argparse.ArgumentParser(
         prefix_chars='-',
         description='deploy/install the requirements found in each given YAML file'
@@ -36,12 +39,12 @@ def main():
 
     except AssertionError as err:
         print("error: {} failed. {}".format(parser.prog, err))
-        sys.exit(-99)
 
     except Exception as err:
         traceback.print_tb(err.__traceback__, limit=1, file=sys.stdout)
         print("error: {} failed. {}".format(parser.prog, err))
-        sys.exit(-99)
 
-if __name__ == '__main__':  # nécessaire que si on veut eviter que ce code soit systématiquement exécuté. Que ce soit comme import ou programme
-    main()
+    return exit_status
+
+if __name__ == '__main__':
+    sys.exit(main())
