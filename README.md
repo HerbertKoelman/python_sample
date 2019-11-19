@@ -6,6 +6,12 @@ The modules handles:
 - The deployment of artifacts listed in a YAML file into a given directory. It searches for packages into a list of directories.
 - The copy of artifacts found in a FS tree into a given artifacts directory
 
+When used in a CI and/or development context, the `artifact-copy` command moves your stuff into a given directory which then is 
+considered as an artifact repository. When you need one of your artifacts, you can use the command artifact-deploy to install 
+the artifact's content somewhere in your workspace. The artifacts are generally copied via a Jenkins script (pipeline or else). 
+One can use CMake to search for dependencies and extract them in the build directory and make the artifact's content 
+available for your build recipes.
+
 An artfact is anything that is any code, library or program packaged into a _compressed tape archive_ (tar.gz). Artifacts are listed 
 into a YAML file under the key *requires*. The requires YAML structure can have two forms.
 
@@ -35,6 +41,35 @@ This python program uses:
 
 > FYI more in ` ./requirements.txt` 
 
+# How to use it
+
+The dependency handler can be build and packaged via this command:
+
+```shell script
+$ python3 setup.py sdist
+running sdist
+running egg_info
+...
+copying artifacts.egg-info/top_level.txt -> artifacts-0.1/artifacts.egg-info
+Writing artifacts-0.1/setup.cfg
+Creating tar archive
+removing 'artifacts-0.1' (and everything under it)
+```
+
+This package is installed with the following command:
+
+```shell script
+Processing ./dist/artifacts-0.1.tar.gz
+Requirement already satisfied: PyYAML==5.1.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (5.1.2)
+Requirement already satisfied: semantic-version==2.8.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (2.8.2)
+Installing collected packages: artifacts
+  Running setup.py install for artifacts: started
+    Running setup.py install for artifacts: finished with status 'done'
+Successfully installed artifacts-0.1
+```
+
+That's it :-)
+
 # What is does
 
 ## Artifact deployment
@@ -51,10 +86,10 @@ An artifact archive uselly contains something like this:
    - bin : program files
 
 ```shell script
-$ python deploye-artifacts.py -h
-usage: deploye-artifacts.py [-h] [--force] --install-dir INSTALL_DIR --target-arch
-                   TARGET_ARCH [--packages-home PACKAGES_HOME_DIR]
-                   ...
+$ artifacts-deploy -h
+usage: artifact-deploy [-h] [--force] --install-dir INSTALL_DIR --target-arch
+                       TARGET_ARCH [--packages-home PACKAGES_HOME_DIR]
+                       ...
 
 deploy/install the requirements found in each given YAML file
 
@@ -63,13 +98,14 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --force               empty the installation directory
+  --force               empty the installation directory before deploying
+                        artifacts
   --install-dir INSTALL_DIR
-                        deploy required artefacts here
+                        deploy required artifacts here
   --target-arch TARGET_ARCH
-                        deploy required artefacts for this CPU architecture
+                        deploy required artifacts for this CPU architecture
   --packages-home PACKAGES_HOME_DIR
-                        deploy required artefacts here
+                        deploy required artifacts here
 ``` 
 
 ## Artifact copy
@@ -78,8 +114,8 @@ The *copy.py* Python program moves artifact tape archives into a target director
 then the archive is not moved. Only *snapshot* artifacts are  *ALWAYS* moved, replacing the xisting archive by the one found.
 
 ```shell script
-$ python copy_artifacts_app.py -h
-usage: copy_artifacts_app.py [-h] [--force] --packages-home PACKAGES_HOME_DIR ...
+$ artifac-copy -h
+usage: artifact-copy [-h] --packages-home PACKAGES_HOME_DIR ...
 
 deploy/install the requirements found in each given YAML file
 
@@ -88,8 +124,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --force               copy artiufact even if a copy is found in target
-                        directory
   --packages-home PACKAGES_HOME_DIR
                         copy found artifacts here
 ```
