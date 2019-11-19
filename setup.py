@@ -1,12 +1,5 @@
 from setuptools import setup, find_packages
 
-def requirements():
-    requirments = []
-    with open('requirements.txt', 'r') as file:
-        requirements = file.readlines()
-
-    return requirements
-
 setup(
     name="artifacts",
     version="0.1.1",
