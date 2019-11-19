@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import sys
+import traceback
 import artifacts
 
 def main():
@@ -11,10 +12,10 @@ def main():
     )
 
     try:
-        parser.add_argument("--force", dest="force",
-                            action='store_true',
-                            required=False,
-                            help='copy artiufact even if a copy is found in target directory')
+        # parser.add_argument("--force", dest="force",
+        #                     action='store_true',
+        #                     required=False,
+        #                     help='copy artifact even if a copy is found in target directory')
         parser.add_argument("--packages-home",
                             dest="packages_home_dir",
                             required=True,
@@ -33,7 +34,12 @@ def main():
             for archive in glob.glob(os.path.join(base_dir, "**", "*.tar.gz"), recursive=True):
                 artifacts.copy_package(archive, arguments.packages_home_dir)
 
+    except AssertionError as err:
+        print("error: {} failed. {}".format(parser.prog, err))
+        sys.exit(-99)
+
     except Exception as err:
+        traceback.print_tb(err.__traceback__, limit=1, file=sys.stdout)
         print("error: {} failed. {}".format(parser.prog, err))
         sys.exit(-99)
 

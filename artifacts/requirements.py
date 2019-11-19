@@ -1,4 +1,5 @@
 import yaml
+import os
 import artifacts
 
 def load_requirements_from(file):
@@ -8,17 +9,19 @@ def load_requirements_from(file):
     :param file: a file that conains requirements
     :return: list of found utils.Artefact instances
     """
-    artifacts = []
+    assert os.path.isfile(file), "'{}' is not a file or doesn't exists !!".format(file)
+
+    list_of_artifacts = []
 
     try:
         with open(file, 'r') as f:
-            artifacts = load_yaml_reader(f)
+            list_of_artifacts = load_yaml_reader(f)
 
     except:
         with open(file, 'r') as f:
-            artifacts = load_plain_text_reader(f)
+            list_of_artifacts = load_plain_text_reader(f)
 
-    return artifacts
+    return list_of_artifacts
 
 def load_yaml_reader(reader):
     documents = yaml.safe_load_all(reader)
@@ -48,4 +51,4 @@ def load_plain_text_reader(reader):
     for artifact in reader.readlines():
         list_of_artifacts.append(artifacts.Artifact(artifact.strip(' ')))
 
-    return artifacts
+    return list_of_artifacts

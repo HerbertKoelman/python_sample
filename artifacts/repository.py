@@ -9,6 +9,9 @@ import artifacts
 PACKAGES_HOME_PATH = os.getenv('PACKAGES_HOME_PATH', '/share/modules').split(':')
 PACKAGES = {}
 
+def package_search_pathes(list):
+    artifacts.PACKAGES_HOME_PATH = list
+
 def install_package(requirement, arch, here):
     """
     search for artifact and untar the corresponding archive file.
@@ -22,7 +25,7 @@ def install_package(requirement, arch, here):
     """
     package = artifacts.Package(requirement, arch)
     if package.id() not in PACKAGES:
-        for packages_home in PACKAGES_HOME_PATH:
+        for packages_home in artifacts.PACKAGES_HOME_PATH:
             try:
                 archive_file = os.path.join(packages_home, package.archive())
                 assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
@@ -63,39 +66,47 @@ def copy_package(archive, to):
     """
 
     status = False
+    try:
+        basename = os.path.basename(archive)
+        dirname  = os.path.dirname(archive)
 
-    basename = os.path.basename(archive)
-    dirname  = os.path.dirname(archive)
+        package = artifacts.Package(basename)
 
-    package = artifacts.Package(basename)
+        source_archive        = os.path.join(dirname, package.archive())
+        source_archive_digest = os.path.join(dirname, package.archive_digest())
+        target_archive        = os.path.join(to, package.archive())
+        target_archive_digest = os.path.join(to, package.archive_digest())
 
-    source_archive        = os.path.join(dirname, package.archive())
-    source_archive_digest = os.path.join(dirname, package.archive_digest())
-    target_archive        = os.path.join(to, package.archive())
-    target_archive_digest = os.path.join(to, package.archive_digest())
-
-    if package.artifact.is_snapshot():
-        check_integrity(source_archive, source_archive_digest)
-        shutil.copy(source_archive, target_archive)
-        shutil.copy(source_archive_digest, target_archive_digest)
-        print ("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
-        status = True
-
-    elif not package.artifact.is_snapshot():
-        if not os.path.isfile(target_archive):
+        if package.artifact.is_snapshot():
             check_integrity(source_archive, source_archive_digest)
             shutil.copy(source_archive, target_archive)
             shutil.copy(source_archive_digest, target_archive_digest)
-            print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+            print ("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
             status = True
 
-        else:
-            print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
-                package.id(),
-                target_archive,
-                package.artifact.id(),
-                to
-            ))
+        elif not package.artifact.is_snapshot():
+            if not os.path.isfile(target_archive):
+                check_integrity(source_archive, source_archive_digest)
+                shutil.copy(source_archive, target_archive)
+                shutil.copy(source_archive_digest, target_archive_digest)
+                print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+                status = True
+
+            else:
+                print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
+                    package.id(),
+                    target_archive,
+                    package.artifact.id(),
+                    to
+                ))
+
+    except AssertionError as err:
+        print("won't copy '{}', {}".format(archive, err))
+
+    except Exception as err:
+        print("function {}.copy_package('{}') failed, {}".format(__name__, archive, err))
+        raise Exception(err)
+
     return status
 
 def remove_all_artifacts_found(here):
