@@ -12,45 +12,54 @@ PACKAGES = {}
 def package_search_pathes(list):
     artifacts.PACKAGES_HOME_PATH = list
 
-def install_package(requirement, arch, here):
+def install_package(artifact, arch, here):
     """
     search for artifact and untar the corresponding archive file.
 
     artifacts are search in the a list of packages home directory. The first valid occurence found is installed.
 
-    :param requirement: a package description string
+    :param artifact: an artifacts.Artifact instance
     :param arch: a valid target processor architecture (x86, ...)
     :param here: path to the installation directory.
     :return:
     """
-    package = artifacts.Package(requirement, arch)
-    if package.id() not in PACKAGES:
+    assert isinstance(artifact, artifacts.Artifact), "{}.install_package expects a Artifact instance, you passed {}".format(
+                          __name__,
+                          artifact.__class__.__name__
+                      )
+
+    package = artifacts.Package(artifact, target_arch=arch)
+    if package.id() not in PACKAGES.keys():
         for packages_home in artifacts.PACKAGES_HOME_PATH:
-            try:
-                archive_file = os.path.join(packages_home, package.archive())
-                assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
-                    archive_file,
-                    packages_home)
+            if package.id() not in PACKAGES.keys():
+                try:
+                    archive_file = os.path.join(packages_home, package.archive())
+                    assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
+                        archive_file,
+                        packages_home)
 
-                digest_file  = os.path.join(packages_home, package.archive_digest())
-                assert os.path.isfile(digest_file), "archive digest file '{}' not found here {}.".format(
-                    digest_file,
-                    packages_home)
+                    digest_file  = os.path.join(packages_home, package.archive_digest())
+                    assert os.path.isfile(digest_file), "archive digest file '{}' not found here {}.".format(
+                        digest_file,
+                        packages_home)
 
-                check_integrity(archive_file, digest_file)
+                    check_integrity(archive_file, digest_file)
 
-                with tarfile.open(archive_file, "r:gz") as archive_reader:
-                    archive_reader.extractall(path=here)
+                    with tarfile.open(archive_file, "r:gz") as archive_reader:
+                        archive_reader.extractall(path=here)
 
-                print("installed '{}' found here '{}' for '{}', here '{}'".format(package.artifact.id(),
-                                                                                  packages_home,
-                                                                                  arch,
-                                                                                  here))
-                PACKAGES[package.id()] = package
-            except AssertionError as err:
-                print(err)
+                    print("installed '{}' found here '{}' for '{}', here '{}'".format(package.artifact.id(),
+                                                                                      packages_home,
+                                                                                      arch,
+                                                                                      here))
+                    PACKAGES[package.id()] = package
+                except AssertionError as err:
+                    print(err)
     else:
-        print("artifact '{}' already deployed.")
+        print("artifact '{}' for architecture {} already deployed here '{}'.".format(
+            artifact.id(),
+            arch,
+            here))
 
 def copy_package(archive, to):
     """
