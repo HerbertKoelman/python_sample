@@ -21,8 +21,11 @@ def install_package(artifact, arch, here):
     :param artifact: an artifacts.Artifact instance
     :param arch: a valid target processor architecture (x86, ...)
     :param here: path to the installation directory.
-    :return:
+    :return: True if successfull
     """
+
+    status = False
+
     assert isinstance(artifact, artifacts.Artifact), "{}.install_package expects a Artifact instance, you passed {}".format(
                           __name__,
                           artifact.__class__.__name__
@@ -35,7 +38,7 @@ def install_package(artifact, arch, here):
                 try:
                     archive_file = os.path.join(packages_home, package.archive())
                     assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
-                        archive_file,
+                        package.archive(),
                         packages_home)
 
                     digest_file  = os.path.join(packages_home, package.archive_digest())
@@ -53,6 +56,8 @@ def install_package(artifact, arch, here):
                                                                                       arch,
                                                                                       here))
                     PACKAGES[package.id()] = package
+                    status = True
+
                 except AssertionError as err:
                     print(err)
     else:
@@ -60,6 +65,7 @@ def install_package(artifact, arch, here):
             artifact.id(),
             arch,
             here))
+    return status
 
 def copy_package(archive, to):
     """

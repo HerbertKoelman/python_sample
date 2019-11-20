@@ -24,8 +24,6 @@ program version: {version}
 
     )
 
-    print ("starting {} (version: {})".format(parser.prog, artifacts.__version__))
-
     try:
 
         parser.add_argument("--force", dest="force",
@@ -36,13 +34,6 @@ program version: {version}
                             dest="packages_home_dir",
                             required=False,
                             help='deploy required artifacts here (default value is ''/share/modules'')')
-
-        # TODO the argparse modulefails to handle exclusive groups and the handling of a version argument is better
-        #  served doing it with exclusive groups !!!
-        # parser.add_argument("--version", dest="version",
-        #                     action='store_true',
-        #                     required=False,
-        #                     help='display application''s version and exit')
 
         mandatory_group = parser.add_argument_group('mandatory arguments')
         mandatory_group.add_argument("--install-dir",
@@ -73,8 +64,11 @@ program version: {version}
 
         for file in arguments.files:
             print("-------------- ", file, " -----------------")
+            counter = 0
             for artefact in artifacts.requirements.load_requirements_from(file):
-                artifacts.repository.install_package(artefact, arch=arguments.target_arch, here=arguments.install_dir )
+                if artifacts.repository.install_package(artefact, arch=arguments.target_arch, here=arguments.install_dir ):
+                    counter += 1
+        print ("{} deployed {} artifacts.".format(parser.prog, counter))
 
     except AssertionError as err:
         print("error: {} failed. {}".format(parser.prog, err))
