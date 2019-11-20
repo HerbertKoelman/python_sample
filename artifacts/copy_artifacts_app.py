@@ -17,22 +17,26 @@ def main():
 The program searches for compressed archive files check thier integrity and copies them to your packages home directory. 
 Archive file names follow this naming rule <name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz.
 
+the command expects a list of items that can either be a file or directory. If the item is directory, the programs searches
+for tape archives recursively. If the item is file, then it's copied.
+
+the last item IS the target directory unless the command lien argument --packages-home is used.
+
 program version: {version}
                 """.format(version=artifacts.__version__)
     )
 
     try:
-        mandatory_arguments = parser.add_argument_group('mandatory arguments')
-        mandatory_arguments.add_argument("--packages-home",
+        parser.add_argument("--packages-home",
                             dest="packages_home_dir",
-                            metavar='repository directory',
+                            metavar='path to repository directory',
                             required=False,
-                            help='copy found artifacts here')
+                            help='copy found artifacts here, you can omit this argument if the last item in argument list is a directory')
 
         parser.add_argument("items",
-                            metavar='base directory to search or archive file',
                             nargs=argparse.REMAINDER,
-                            help='base directory to search for artifacts or archive file')
+                            metavar="source items... target dir",
+                            help='copy artifacts packages into target directory.')
 
         arguments = parser.parse_args()
 
