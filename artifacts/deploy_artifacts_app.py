@@ -6,31 +6,56 @@ import artifacts
 
 def main():
     """Handles the deployment of artifacts."""
-
     parser = argparse.ArgumentParser(
         prefix_chars='-',
-        description='deploy/install the requirements found in each given YAML file'
+        formatter_class=argparse.RawTextHelpFormatter,
+        description='deploy/install the requirements found in each given file',
+        epilog="""
+The program searches for requirement entries in either a text or yaml file. For each entry, it searches for a package
+that satifies the requirment. If a match is found and the package's integrity is verified, it is installed into your 
+workspace directory.
+
+A requirement is a formatted string of the form <name>[-<os>]-<semver>[-snapshot]. The parts in the square baces are 
+optional. For each requirement found in the given files, the programs searches PACKAGES_HOME_PATH for an archive named 
+like this <name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz.
+
+program version: {version}
+                """.format(version=artifacts.__version__)
+
     )
 
+    print ("starting {} (version: {})".format(parser.prog, artifacts.__version__))
+
     try:
+
         parser.add_argument("--force", dest="force",
                             action='store_true',
                             required=False,
                             help='empty the installation directory before deploying artifacts')
-        parser.add_argument("--install-dir",
-                            dest="install_dir",
-                            required=True,
-                            help='deploy required artifacts here')
-        parser.add_argument("--target-arch",
-                            dest="target_arch",
-                            required=True,
-                            help='deploy required artifacts for this CPU architecture')
         parser.add_argument("--packages-home",
                             dest="packages_home_dir",
                             required=False,
-                            help='deploy required artifacts here')
+                            help='deploy required artifacts here (default value is ''/share/modules'')')
 
-        parser.add_argument("files", nargs=argparse.REMAINDER, help='YAML files to parses')
+        # TODO the argparse modulefails to handle exclusive groups and the handling of a version argument is better
+        #  served doing it with exclusive groups !!!
+        # parser.add_argument("--version", dest="version",
+        #                     action='store_true',
+        #                     required=False,
+        #                     help='display application''s version and exit')
+
+        mandatory_group = parser.add_argument_group('mandatory arguments')
+        mandatory_group.add_argument("--install-dir",
+                            dest="install_dir",
+                            required=True,
+                            help='deploy required artifacts here')
+        mandatory_group.add_argument("--target-arch",
+                            dest="target_arch",
+                            choices=artifacts.KNOWN_ARCHS,
+                            required=True,
+                            help='deploy required artifacts for this CPU architecture')
+
+        parser.add_argument("files", nargs=argparse.REMAINDER, metavar='file1...', help='requirement files to parses, can be a YAML or text file')
 
         arguments = parser.parse_args()
 

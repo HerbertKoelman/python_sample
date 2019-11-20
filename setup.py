@@ -1,8 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import version, setup, find_packages
+import artifacts
 
 setup(
     name="artifacts",
-    version="0.1.1",
+    version=artifacts.__version__.__str__(),
 
     packages=find_packages(include=['artifacts'],exclude=['tests','venv']),
 
