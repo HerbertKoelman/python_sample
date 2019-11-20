@@ -60,8 +60,18 @@ class apps_test_cases(unittest.TestCase):
     def test_copy_app(self):
         sys.argv = [
             "{}.copy_app_test".format(__name__),
+            'tests/fixtures/', 'tests/fixtures/artifact-qnx-2.3.4-snapshot-x86.tar.gz','tests/fixtures/cpp-pthread-Darwin-1.11.0-x86.tar.gz',
+            self.repository
+        ]
+        artifacts.copy_artifacts_app.main()
+        archives = glob.glob(os.path.join(self.repository, '*.tar.gz'))
+        self.assertEqual(2, len(archives))
+
+    def test_copy_app_with_package_arg(self):
+        sys.argv = [
+            "{}.copy_app_test".format(__name__),
             '--packages-home', self.repository,
-            'tests/fixtures/', 'tests/fixtures/artifact-qnx-2.3.4-snapshot-x86.tar.gz','tests/fixtures/cpp-pthread-Darwin-1.11.0-x86.tar.gz'
+            'tests/fixtures/', 'tests/fixtures/artifact-qnx-2.3.4-snapshot-x86.tar.gz','tests/fixtures/cpp-pthread-Darwin-1.11.0-x86.tar.gz',
         ]
         artifacts.copy_artifacts_app.main()
         archives = glob.glob(os.path.join(self.repository, '*.tar.gz'))

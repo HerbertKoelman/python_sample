@@ -26,27 +26,37 @@ program version: {version}
         mandatory_arguments.add_argument("--packages-home",
                             dest="packages_home_dir",
                             metavar='repository directory',
-                            required=True,
+                            required=False,
                             help='copy found artifacts here')
 
-        parser.add_argument("base_dirs",
+        parser.add_argument("items",
                             metavar='base directory to search or archive file',
                             nargs=argparse.REMAINDER,
                             help='base directory to search for artifacts or archive file')
 
         arguments = parser.parse_args()
 
-        if arguments.base_dirs is None or len(arguments.base_dirs) == 0:
+        if arguments.items is None or len(arguments.items) == 0:
             parser.print_usage()
-            raise Exception("missing base directories")
+            raise Exception("missing item list")
+        else:
+            if arguments.packages_home_dir is not None:
+                repository = arguments.packages_home_dir
+            else:
+                repository = arguments.items[len(arguments.items) - 1]
+                arguments.items.pop()
 
-        for base_dir in arguments.base_dirs:
-            if os.path.isfile(base_dir):
-                artifacts.copy_package(base_dir, arguments.packages_home_dir)
-            elif os.path.isdir(base_dir):
-                print("-------------- searching base dir: ", base_dir, " -----------------")
-                for archive in glob.glob(os.path.join(base_dir, "**", "*.tar.gz"), recursive=True):
-                    artifacts.copy_package(archive, arguments.packages_home_dir)
+            assert os.path.isdir(repository), "{} is not a directory.".format(repository)
+
+            for item in arguments.items:
+                if os.path.isfile(item):
+                    artifacts.copy_package(item, repository)
+                elif os.path.isdir(item):
+                    print("-------------- searching base dir: ", item, " -----------------")
+                    for archive in glob.glob(os.path.join(item, "**", "*.tar.gz"), recursive=True):
+                        artifacts.copy_package(archive, repository)
+                else:
+                    raise AssertionError("'{}' is neither a file nor a directory.".format(item))
 
     except AssertionError as err:
         print("error: {} failed. {}".format(parser.prog, err))
