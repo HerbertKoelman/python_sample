@@ -11,20 +11,28 @@ def main():
 
     parser = argparse.ArgumentParser(
         prefix_chars='-',
-        description='deploy/install the requirements found in each given YAML file'
+        formatter_class=argparse.RawTextHelpFormatter,
+        description='copy artifacts in your repository directory',
+        epilog="""
+The program searches for compressed archive files check thier integrity and copies them to your packages home directory. 
+Archive file names follow this naming rule <name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz.
+
+program version: {version}
+                """.format(version=artifacts.__version__)
     )
 
     try:
-        # parser.add_argument("--force", dest="force",
-        #                     action='store_true',
-        #                     required=False,
-        #                     help='copy artifact even if a copy is found in target directory')
-        parser.add_argument("--packages-home",
+        mandatory_arguments = parser.add_argument_group('mandatory arguments')
+        mandatory_arguments.add_argument("--packages-home",
                             dest="packages_home_dir",
+                            metavar='repository directory',
                             required=True,
                             help='copy found artifacts here')
 
-        parser.add_argument("base_dirs", nargs=argparse.REMAINDER, help='artifact search base directories')
+        parser.add_argument("base_dirs",
+                            metavar='base directory to search or archive file',
+                            nargs=argparse.REMAINDER,
+                            help='base directory to search for artifacts or archive file')
 
         arguments = parser.parse_args()
 
@@ -33,9 +41,12 @@ def main():
             raise Exception("missing base directories")
 
         for base_dir in arguments.base_dirs:
-            print("-------------- base dir: ", base_dir, " -----------------")
-            for archive in glob.glob(os.path.join(base_dir, "**", "*.tar.gz"), recursive=True):
-                artifacts.copy_package(archive, arguments.packages_home_dir)
+            if os.path.isfile(base_dir):
+                artifacts.copy_package(base_dir, arguments.packages_home_dir)
+            elif os.path.isdir(base_dir):
+                print("-------------- searching base dir: ", base_dir, " -----------------")
+                for archive in glob.glob(os.path.join(base_dir, "**", "*.tar.gz"), recursive=True):
+                    artifacts.copy_package(archive, arguments.packages_home_dir)
 
     except AssertionError as err:
         print("error: {} failed. {}".format(parser.prog, err))
