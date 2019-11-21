@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 import glob
 import os
 import sys
 import traceback
+
 import artifacts
+
 
 def main():
 

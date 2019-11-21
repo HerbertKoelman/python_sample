@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import hashlib
 import os
-import tarfile
 import shutil
-import glob
+import tarfile
+
 import artifacts
 
 # singleton

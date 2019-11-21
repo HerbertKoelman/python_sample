@@ -1,6 +1,8 @@
 # Object
 
-This is a very simple dependency handling system. It's based on naming conventions and plain tape archive files (tar.gz).
+[![Build Status](https://travis-ci.com/HerbertKoelman/python_sample.svg?branch=master)](https://travis-ci.com/HerbertKoelman/python_sample)
+
+This is a very simple dependency handling system. It's based on naming conventions and plain archive files.
 
 > Normally, you should use thinks like [conan](https://conan.io) to handle dependencies. But, if for some obscur reason this is not an option, then 
 > this can ease the pain.

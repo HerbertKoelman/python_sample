@@ -1,6 +1,8 @@
-import os
-import artifacts
+# -*- coding: utf-8 -*-
+
 import re
+
+import artifacts
 
 KNOWN_ARCHS = ['x86', 'x86_64', 'armv7']
 KNOWN_OS    = ['qnx', 'linux',  'darwin']

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import platform
 import semantic_version
 import artifacts
@@ -5,11 +7,7 @@ import artifacts
 
 class Artifact:
     """
-    Un truc fait par un dévéloppeur.
-
-    En informatique, un artéfact computationnel est le résultat obtenu par l'homme par l'usage d'outils ou de principes
-    reliés aux domaines de l'informatique, du multimédia ou de la pensée computationnelle. Un artéfact computationnel
-    peut être un programme, un script, un microprocesseur, une image, un jeu, une vidéo, une page Web, etc.
+    Describes something crafted by a developper to make your life easier.
     """
 
     KNOWN_BUILD_TYPES = ['snapshot', 'stable']
@@ -29,6 +27,7 @@ class Artifact:
         :param os: the OS this artifact was built for.
         :param source_arch: the CPU this artifact was built for (x86, armv7, ...)
         :param description: a short description of what it does.
+
         """
         try:
             assert name is not None, "missing name attribute/parameter, failed to initialize class Artefact."
@@ -38,11 +37,13 @@ class Artifact:
             self.description = description
             if source_arch is None:
                 self.source_arch = platform.machine()
+
             else:
                 self.source_arch = source_arch
 
             if version is None: # and build_type is None:
                 self.name, self.version, self.build_type, self.os = self.parse_artifact_description_string(name)
+
             else:
                 self.version = semantic_version.Version(version)
                 self.build_type = build_type
@@ -50,6 +51,7 @@ class Artifact:
             # TODO suppress this self.package = Package(self)
 
             assert self.version is not None, "failed to set class Artefact's attribute version, initialization of Artefact {} failed".format(name)
+
         except ValueError as err:
             raise ValueError("failed to initialize artefact [{}], {}".format(name, err))
 
@@ -67,6 +69,7 @@ class Artifact:
 
         :param description_string: description string where each descirption is a token.
         :return: name, version, build_type, os
+
         """
         seperator        = '-'
         tokens           = description_string.split(seperator)
@@ -85,6 +88,7 @@ class Artifact:
             if semantic_version.validate(token):
                 version = semantic_version.Version(token)
                 break
+
             version_position += 1
 
         # version is the last token, we shall consider
