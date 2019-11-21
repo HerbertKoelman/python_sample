@@ -1,7 +1,6 @@
 # author: Herbert Koelman
 # created on: Jeu 21 nov 2019 14:44:25 CET
 os: linux
-
 language: python
 python:
   - "3.6"
