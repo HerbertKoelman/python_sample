@@ -1,6 +1,75 @@
 # Object
 
-This is a very simple dependency handling system. It's based on naming conventions and plain archive files.
+This is a very simple dependency handling system. It's based on naming conventions and plain tape archive files (tar.gz).
+
+> Normally, you should use thinks like [conan](https://conan.io) to handle dependencies. But, if for some obscur reason this is not an option, then 
+> this can ease the pain.
+
+A plain software build is relying on
+1. source code (the one you write) 
+2. libraries that needs to be identified and versionned
+
+A software build might in turn produce a library used by yourself or someone else.
+
+```shell script
+                    <source code>
+                          A
+                          |
+                    [cmake build] -> <package>.tar.gz -> [artifact-copy] -> /your/repository
+                          |
+                          V
+/your/repository  <-[artifact-deploy]
+```
+
+This module offers two commands (`artifact_copy` and `artifact-deploy`) that helps handling your dependencies.
+
+# How to use it
+
+The dependency handler can be build and packaged via this command:
+
+```shell script
+$ python3 setup.py sdist
+running sdist
+running egg_info
+...
+copying artifacts.egg-info/top_level.txt -> artifacts-0.1/artifacts.egg-info
+Writing artifacts-0.1/setup.cfg
+Creating tar archive
+removing 'artifacts-0.1' (and everything under it)
+```
+
+This package is installed with the following command:
+
+```shell script
+$ pip install ./dist/artifacts-0.1.tar.gz
+Processing ./dist/artifacts-0.1.tar.gz
+Requirement already satisfied: PyYAML==5.1.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (5.1.2)
+Requirement already satisfied: semantic-version==2.8.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (2.8.2)
+Installing collected packages: artifacts
+  Running setup.py install for artifacts: started
+    Running setup.py install for artifacts: finished with status 'done'
+Successfully installed artifacts-0.1
+```
+
+You can now use the commands:
+- `artifact-deploy`
+- `artifact-copy`
+
+# How it's done
+
+In the above example, cmake is locating the project's source files and it delegates to the command `artifact-deploy` the 
+task to:
+1. identify the required libraries
+2. search for the requirements
+3. check integrity of found matches
+4. copy the library in some place that the developper can access.
+
+A library is expected packaged like this `<name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz`:
+- name: speaks for itself
+- os: the operating system the package was built for (Darwin, ...) - optional
+- semver: semantic version (more on [semver](http://semver.org) here)
+- snapshot: build type (either snapshot or stable)
+- target arch: target CPU (x86, armv7, ...)
 
 The modules handles:
 - The deployment of artifacts listed in a YAML file into a given directory. It searches for packages into a list of directories.
@@ -41,37 +110,9 @@ This python program uses:
 
 > FYI more in ` ./requirements.txt` 
 
-# How to use it
 
-The dependency handler can be build and packaged via this command:
 
-```shell script
-$ python3 setup.py sdist
-running sdist
-running egg_info
-...
-copying artifacts.egg-info/top_level.txt -> artifacts-0.1/artifacts.egg-info
-Writing artifacts-0.1/setup.cfg
-Creating tar archive
-removing 'artifacts-0.1' (and everything under it)
-```
-
-This package is installed with the following command:
-
-```shell script
-$ pip install ./dist/artifacts-0.1.tar.gz
-Processing ./dist/artifacts-0.1.tar.gz
-Requirement already satisfied: PyYAML==5.1.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (5.1.2)
-Requirement already satisfied: semantic-version==2.8.2 in ./venv/lib/python3.7/site-packages (from artifacts==0.1) (2.8.2)
-Installing collected packages: artifacts
-  Running setup.py install for artifacts: started
-    Running setup.py install for artifacts: finished with status 'done'
-Successfully installed artifacts-0.1
-```
-
-That's it :-)
-
-# What is does
+# What it implements
 
 ## Artifact deployment
 
