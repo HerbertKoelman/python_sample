@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import semantic_version
 
 """artifacts' package version"""

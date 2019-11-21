@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 import sys
-import os
 import traceback
+
 import artifacts
+
 
 def main():
     """Handles the deployment of artifacts."""

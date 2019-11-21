@@ -1,6 +1,11 @@
-import yaml
+# -*- coding: utf-8 -*-
+
 import os
+
+import yaml
+
 import artifacts
+
 
 def load_requirements_from(file):
     """
