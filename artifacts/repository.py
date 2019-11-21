@@ -98,7 +98,7 @@ def copy_package(archive, to):
             check_integrity(source_archive, source_archive_digest)
             shutil.copy(source_archive, target_archive)
             shutil.copy(source_archive_digest, target_archive_digest)
-            print ("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+            print ("copied {} to {}".format(package.id(),target_archive))
             status = True
 
         elif not package.artifact.is_snapshot():
@@ -106,14 +106,12 @@ def copy_package(archive, to):
                 check_integrity(source_archive, source_archive_digest)
                 shutil.copy(source_archive, target_archive)
                 shutil.copy(source_archive_digest, target_archive_digest)
-                print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+                print("copied {} to {}".format(package.id(), target_archive))
                 status = True
 
             else:
-                print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
+                print ("stable package '{}' found here '{}', package will NOT be copied".format(
                     package.id(),
-                    target_archive,
-                    package.artifact.id(),
                     to
                 ))
 

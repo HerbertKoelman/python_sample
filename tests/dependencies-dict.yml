@@ -4,5 +4,5 @@ requires:
   stable:
     - ipcm-api-qnx-1.42.0
   snapshot:
-    - common-qnx-2.0.1
+    - my-lib-qnx-2.0.1
 
