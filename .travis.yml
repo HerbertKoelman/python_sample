@@ -29,7 +29,7 @@ addons:
     organization: "herbertkoelman-github"
 
 script:
-  - python ./setup.py test && python ./setup.py build sdist
+  - python ./setup.py test && python ./setup.py sdist
 
 #after_success:
 #  - do something (upload ?)

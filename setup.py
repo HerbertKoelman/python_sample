@@ -1,9 +1,28 @@
 from setuptools import version, setup, find_packages
 import artifacts
 
+_version="{major}.{minor}.{patch}".format(
+    major=artifacts.__version__.major,
+    minor=artifacts.__version__.minor,
+    patch=artifacts.__version__.patch
+)
+
+_classifiers = [
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Environment :: Console',
+        'Environment :: MacOS X',
+        'Operating System :: POSIX :: Linux',
+    ]
+
+if artifacts.__version__.prerelease is not None:
+    _classifiers.append('Development Status :: 4 - Beta')
+else:
+    _classifiers.append('Development Status :: 5 - Production/Stable')
+
 setup(
     name="artifacts",
-    version=artifacts.__version__.__str__(),
+    version=_version,
 
     packages=find_packages(include=['artifacts'],exclude=['tests','venv']),
 
@@ -35,11 +54,7 @@ setup(
     """,
     keywords="handling artifacts",
     url="https://github.com/HerbertKoelman/python_sample",
-    licence='GPLv3+',
+    license='GPLv3+',
 
-    classifiers=[
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Environment :: Console'
-    ]
+    classifiers=_classifiers
 )
