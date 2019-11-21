@@ -1,5 +1,7 @@
 # Object
 
+[![Build Status](https://travis-ci.com/HerbertKoelman/python_sample.svg?branch=master)](https://travis-ci.com/HerbertKoelman/python_sample)
+
 This is a very simple dependency handling system. It's based on naming conventions and plain archive files.
 
 The modules handles:
