@@ -6,26 +6,18 @@ import artifacts
 
 
 class Artifact:
-    """
-    Describes something crafted by a developper to make your life easier.
-    """
 
     KNOWN_BUILD_TYPES = ['snapshot', 'stable']
 
-    def __init__(self, name: str, build_type: str = None, version = None, os: str = None, source_arch: str = None, description: str = None):
+    def __init__(self, name: str, build_type: str = None, version = None, os: str = None, description: str = None):
         """
-        Artifact description class.
+        initialize an Artifact description instance.
 
-        The default packaging is a TAR.GZ file.
-
-        If the versin and builr_type properties are not passed, then we consider name to be an artifact description string. This
-        description string is parsed and version and build type infos are searched for.
-
-        :param name: artifact name.
+        :param name: artifact name or description string.
         :param build_type: does this instance represent a stable or snapshot version
-        :param version: artifact's semantic vzersion number (semver)
+        :param version: artifact's semantic version number (semver)
         :param os: the OS this artifact was built for.
-        :param source_arch: the CPU this artifact was built for (x86, armv7, ...)
+        :param source_arch: the CPU this artifact was instantiated (x86, armv7, ...)
         :param description: a short description of what it does.
 
         """
@@ -35,18 +27,13 @@ class Artifact:
             self.name = name
             self.os = os
             self.description = description
-            if source_arch is None:
-                self.source_arch = platform.machine()
-
-            else:
-                self.source_arch = source_arch
+            self.build_type = build_type
 
             if version is None: # and build_type is None:
-                self.name, self.version, self.build_type, self.os = self.parse_artifact_description_string(name)
+               self.parse_artifact_description_string(name)
 
             else:
                 self.version = semantic_version.Version(version)
-                self.build_type = build_type
 
             # TODO suppress this self.package = Package(self)
 
@@ -57,15 +44,9 @@ class Artifact:
 
     def parse_artifact_description_string(self, description_string):
         """
-        A description string is made of tokens arranged like this:
-        name_of-artefact-<sem ver version>[-snapshot]
+        A description string should lok like this 'artifact_name[-os]-<sem ver version>[-snapshot]'.
 
-        The name of the artefact MUST be seperated by a valid semantic version string. There can be ONLY and ONLY one optional
-        token after the version token: snapshot. If an artefact is not a snapshot version it is considered a stable one.
-
-        Everything that on left side of the versin token is considered to be the artifact's name.
-
-        For example the description string 'common-qnx-1.2.3-SNAPSHOT' will be regonized as "common-qnx (version: 1.2.3, arch: x86_64, build type: snapshot)"
+        This string is parsed and each attr found is used to initialize class instance.
 
         :param description_string: description string where each descirption is a token.
         :return: name, version, build_type, os
@@ -99,10 +80,10 @@ class Artifact:
         elif version_position == (last_token - 1):
             build_type = tokens[last_token].lower()
             assert build_type in Artifact.KNOWN_BUILD_TYPES, \
-                   "in '{}' was found a build type '{}'}' which is not a valid value. Accepted values are {}".format(
-                       description_string,
-                       build_type,
-                       Artifact.KNOWN_BUILD_TYPES)
+                "in '{}' was found a build type '{}'}' which is not a valid value. Accepted values are {}".format(
+                    description_string,
+                    build_type,
+                    Artifact.KNOWN_BUILD_TYPES)
 
             tokens.pop(last_token)
             tokens.pop(last_token -1)
@@ -120,9 +101,17 @@ class Artifact:
 
         assert name is not None and version is not None, "failed to parse artifact description string '{}'".format(description_string)
 
-        return name, version, build_type, os
+        self.name = name
+        self.version=version
+        self.os = os
+
+        if build_type is not None:
+            self.build_type = build_type
 
     def id(self):
+        """
+        :return: unique identification string
+        """
         id = self.name
         if self.os is not None:
             id += "-{os}".format(os=self.os)
@@ -132,20 +121,33 @@ class Artifact:
         if self.build_type == 'snapshot':
             id += "-{build_type}".format(build_type=self.build_type)
 
-        # TODO suppress this id += "-{arch}".format(arch=self.source_arch)
-
         return id
 
     def is_snapshot(self):
+        """
+        :return: True if this is a snapshot version (unstable)
+        """
         return self.build_type == 'snapshot'
 
-    def summary(self):
-        print("name: ", self.name)
-        print("OS: ", self.os)
-        print("arch: ", self.source_arch)
-        print("version: {} ({})".format(self.version, self.build_type_display_name()))
-        print("description --------------------------------------------------------")
-        print(self.description)
+    def desc(self):
+        """
+        :return: a short description string (all attributes are displayed)
+        """
+        if self.description is None:
+            return "{name} / {version} (os: {os}, build type: {build_type})".format(
+                name=self.name,
+                version=self.version,
+                os=self.os,
+                build_type=self.build_type_display_name()
+            )
+        else:
+            return "{name} / {version} (os: {os}, build type: {build_type}): {description}".format(
+                name=self.name,
+                version=self.version,
+                os=self.os,
+                build_type=self.build_type_display_name(),
+                description=self.description
+            )
 
     def build_type_display_name(self):
         if self.build_type is None:
@@ -154,13 +156,7 @@ class Artifact:
             return self.build_type
 
     def __str__(self):
-
-        return "{name} (version: {version}, os: {os}, arch: {arch}, build type: {build_type})".format(
-            name=self.name,
-            version=self.version,
-            os=self.os,
-            arch= self.source_arch,
-            build_type=self.build_type_display_name())
+        return self.id()
 
     def __eq__(self, other):
         if isinstance(other, str):

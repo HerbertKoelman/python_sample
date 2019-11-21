@@ -5,7 +5,7 @@ class requirements_test_cases(unittest.TestCase):
     def test_load_from_yaml_file(self):
         path_to_yaml_files = ['tests/dependencies.yml', 'tests/dependencies-dict.yml']
 
-        expected_values = ['ipcm-api-qnx-1.42.0-armv7', 'common-qnx-2.0.1-armv7']
+        expected_values = ['ipcm-api-qnx-1.42.0-armv7', 'common-qnx-2.0.1-armv7', 'my-lib-qnx-2.0.1-snapshot-armv7']
 
         for path_to_yaml_file in path_to_yaml_files:
             requirements = artifacts.load_requirements_from(path_to_yaml_file)

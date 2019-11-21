@@ -42,12 +42,13 @@ program version: {version}
         mandatory_group.add_argument("--install-dir",
                             dest="install_dir",
                             required=True,
-                            help='deploy required artifacts here')
+                            metavar='workspace',
+                            help='install packages here')
         mandatory_group.add_argument("--target-arch",
                             dest="target_arch",
                             choices=artifacts.KNOWN_ARCHS,
                             required=True,
-                            help='deploy required artifacts for this CPU architecture')
+                            help='deploy only packages that can runon this CPU architecture')
 
         parser.add_argument("files", nargs=argparse.REMAINDER, metavar='file1...', help='requirement files to parses, can be a YAML or text file')
 
@@ -66,7 +67,7 @@ program version: {version}
             artifacts.remove_all_artifacts_found(arguments.install_dir)
 
         for file in arguments.files:
-            print("-------------- ", file, " -----------------")
+            # TODO remove this print("-------------- ", file, " -----------------")
             counter = 0
             for artefact in artifacts.requirements.load_requirements_from(file):
                 if artifacts.repository.install_package(artefact, arch=arguments.target_arch, here=arguments.install_dir ):

@@ -33,9 +33,9 @@ program version: {version}
     try:
         parser.add_argument("--packages-home",
                             dest="packages_home_dir",
-                            metavar='path to repository directory',
+                            metavar='repository directory',
                             required=False,
-                            help='copy found artifacts here, you can omit this argument if the last item in argument list is a directory')
+                            help='packages are copied here')
 
         parser.add_argument("items",
                             nargs=argparse.REMAINDER,
@@ -45,7 +45,7 @@ program version: {version}
         arguments = parser.parse_args()
 
         if arguments.items is None or len(arguments.items) == 0:
-            parser.print_usage()
+            parser.print_help()
             raise Exception("missing item list")
         else:
             if arguments.packages_home_dir is not None:
@@ -60,7 +60,7 @@ program version: {version}
                 if os.path.isfile(item):
                     artifacts.copy_package(item, repository)
                 elif os.path.isdir(item):
-                    print("-------------- searching base dir: ", item, " -----------------")
+                    # TODO remove this - print("-------------- searching base dir: ", item, " -----------------")
                     for archive in glob.glob(os.path.join(item, "**", "*.tar.gz"), recursive=True):
                         artifacts.copy_package(archive, repository)
                 else:

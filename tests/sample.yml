@@ -5,6 +5,7 @@ requires:
   - ipcm-api-qnx-2.2.3
   - bsp-qnx-3.2.3
   - double-qnx-1.0.0
+  - artifact-qnx-2.3.4-snapshot
 ...
 ---
 requires:
@@ -13,5 +14,6 @@ requires:
     - cpp-pthread-qnx-3.2.3
     - double-qnx-1.0.0
   snapshot:
+    - artifact-qnx-2.3.4
     - snapshot-lib-qnx-1.2.3
 ...
