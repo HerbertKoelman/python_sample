@@ -43,7 +43,7 @@ def load_yaml_reader(reader):
         if isinstance(requirements, dict):
             if 'stable' in requirements.keys():
                 for artifact_description in requirements['stable']:
-                    artifact = artifacts.Artifact(artifact_description)
+                    artifact = artifacts.Artifact(artifact_description, build_type='stable')
                     if artifact not in list_of_artifacts:
                         list_of_artifacts.append(artifact)
             if 'snapshot' in requirements.keys():

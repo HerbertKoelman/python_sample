@@ -2,8 +2,29 @@ import unittest
 import artifacts
 
 class requirements_test_cases(unittest.TestCase):
+
     def test_load_from_yaml_file(self):
-        path_to_yaml_files = ['tests/dependencies.yml', 'tests/dependencies-dict.yml']
+        path_to_yaml_files = ['tests/dependencies.yml']
+
+        expected_values = ['ipcm-api-qnx-1.42.0-armv7', 'common-qnx-2.0.1-armv7', 'my-lib-qnx-2.0.1-snapshot-armv7']
+
+        for path_to_yaml_file in path_to_yaml_files:
+            requirements = artifacts.load_requirements_from(path_to_yaml_file)
+
+            self.assertIsNotNone(requirements, msg="failed to load requirements from file '{}'".format(path_to_yaml_file))
+            self.assertEqual(2, len(requirements), msg="unexpected number requirements found in '{}'".format(path_to_yaml_file))
+
+            for artefact in requirements:
+                package = artifacts.Package(artefact, 'armv7')
+                # DEBUG print ("{}: {}".format(__name__, package.id()))
+                self.assertTrue(package.id() in expected_values,
+                                "Expect {id} to be in {expected} ({path})".format(
+                                    id=package.id(),
+                                    path=path_to_yaml_file,
+                                    expected=expected_values))
+
+    def test_load_from_yaml_with_dict_file(self):
+        path_to_yaml_files = ['tests/dependencies-dict.yml']
 
         expected_values = ['ipcm-api-qnx-1.42.0-armv7', 'common-qnx-2.0.1-armv7', 'my-lib-qnx-2.0.1-snapshot-armv7']
 
