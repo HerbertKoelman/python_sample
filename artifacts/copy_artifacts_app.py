@@ -1,47 +1,79 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 import glob
 import os
 import sys
 import traceback
+
 import artifacts
 
+
 def main():
+
+    exit_status = -99
+
     parser = argparse.ArgumentParser(
         prefix_chars='-',
-        description='deploy/install the requirements found in each given YAML file'
+        formatter_class=argparse.RawTextHelpFormatter,
+        description='copy artifacts in your repository directory',
+        epilog="""
+The program searches for compressed archive files check thier integrity and copies them to your packages home directory. 
+Archive file names follow this naming rule <name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz.
+
+the command expects a list of items that can either be a file or directory. If the item is directory, the programs searches
+for tape archives recursively. If the item is file, then it's copied.
+
+the last item IS the target directory unless the command lien argument --packages-home is used.
+
+program version: {version}
+                """.format(version=artifacts.__version__)
     )
 
     try:
-        # parser.add_argument("--force", dest="force",
-        #                     action='store_true',
-        #                     required=False,
-        #                     help='copy artifact even if a copy is found in target directory')
         parser.add_argument("--packages-home",
                             dest="packages_home_dir",
-                            required=True,
-                            help='copy found artifacts here')
+                            metavar='repository directory',
+                            required=False,
+                            help='packages are copied here')
 
-        parser.add_argument("base_dirs", nargs=argparse.REMAINDER, help='artifact search base directories')
+        parser.add_argument("items",
+                            nargs=argparse.REMAINDER,
+                            metavar="source items... target dir",
+                            help='copy artifacts packages into target directory.')
 
         arguments = parser.parse_args()
 
-        if arguments.base_dirs is None or len(arguments.base_dirs) == 0:
-            parser.print_usage()
-            raise Exception("missing base directories")
+        if arguments.items is None or len(arguments.items) == 0:
+            parser.print_help()
+            raise Exception("missing item list")
+        else:
+            if arguments.packages_home_dir is not None:
+                repository = arguments.packages_home_dir
+            else:
+                repository = arguments.items[len(arguments.items) - 1]
+                arguments.items.pop()
 
-        for base_dir in arguments.base_dirs:
-            print("-------------- base dir: ", base_dir, " -----------------")
-            for archive in glob.glob(os.path.join(base_dir, "**", "*.tar.gz"), recursive=True):
-                artifacts.copy_package(archive, arguments.packages_home_dir)
+            assert os.path.isdir(repository), "{} is not a directory.".format(repository)
+
+            for item in arguments.items:
+                if os.path.isfile(item):
+                    artifacts.copy_package(item, repository)
+                elif os.path.isdir(item):
+                    # TODO remove this - print("-------------- searching base dir: ", item, " -----------------")
+                    for archive in glob.glob(os.path.join(item, "**", "*.tar.gz"), recursive=True):
+                        artifacts.copy_package(archive, repository)
+                else:
+                    raise AssertionError("'{}' is neither a file nor a directory.".format(item))
 
     except AssertionError as err:
         print("error: {} failed. {}".format(parser.prog, err))
-        sys.exit(-99)
 
     except Exception as err:
         traceback.print_tb(err.__traceback__, limit=1, file=sys.stdout)
         print("error: {} failed. {}".format(parser.prog, err))
-        sys.exit(-99)
 
-if __name__ == '__main__':  # nécessaire que si on veut eviter que ce code soit systématiquement exécuté. Que ce soit comme import ou programme
-    main()
+    return exit_status
+
+if __name__ == '__main__':
+    sys.exit(main())

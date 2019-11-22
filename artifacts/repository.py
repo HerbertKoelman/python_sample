@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import hashlib
 import os
-import tarfile
 import shutil
-import glob
+import tarfile
+
 import artifacts
 
 # singleton
@@ -12,45 +14,66 @@ PACKAGES = {}
 def package_search_pathes(list):
     artifacts.PACKAGES_HOME_PATH = list
 
-def install_package(requirement, arch, here):
+def install_package(artifact, arch, here):
     """
     search for artifact and untar the corresponding archive file.
 
     artifacts are search in the a list of packages home directory. The first valid occurence found is installed.
 
-    :param requirement: a package description string
+    :param artifact: an artifacts.Artifact instance
     :param arch: a valid target processor architecture (x86, ...)
     :param here: path to the installation directory.
-    :return:
+    :return: True if successfull
     """
-    package = artifacts.Package(requirement, arch)
-    if package.id() not in PACKAGES:
+
+    status = False
+
+    assert isinstance(artifact, artifacts.Artifact), "{}.install_package expects a Artifact instance, you passed {}".format(
+                          __name__,
+                          artifact.__class__.__name__
+                      )
+
+    package = artifacts.Package(artifact, target_arch=arch)
+
+    if package.id() not in PACKAGES.keys():
         for packages_home in artifacts.PACKAGES_HOME_PATH:
-            try:
-                archive_file = os.path.join(packages_home, package.archive())
-                assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
-                    archive_file,
-                    packages_home)
+            if package.id() not in PACKAGES.keys():
+                try:
+                    archive_file = os.path.join(packages_home, package.archive())
+                    assert os.path.isfile(archive_file), "archive file '{}' not found here {}.".format(
+                        package.archive(),
+                        packages_home)
 
-                digest_file  = os.path.join(packages_home, package.archive_digest())
-                assert os.path.isfile(digest_file), "archive digest file '{}' not found here {}.".format(
-                    digest_file,
-                    packages_home)
+                    digest_file  = os.path.join(packages_home, package.archive_digest())
+                    assert os.path.isfile(digest_file), "archive digest file '{}' not found here {}.".format(
+                        digest_file,
+                        packages_home)
 
-                check_integrity(archive_file, digest_file)
+                    check_integrity(archive_file, digest_file)
 
-                with tarfile.open(archive_file, "r:gz") as archive_reader:
-                    archive_reader.extractall(path=here)
+                    with tarfile.open(archive_file, "r:gz") as archive_reader:
+                        archive_reader.extractall(path=here)
 
-                print("installed '{}' found here '{}' for '{}', here '{}'".format(package.artifact.id(),
-                                                                                  packages_home,
-                                                                                  arch,
-                                                                                  here))
-                PACKAGES[package.id()] = package
-            except AssertionError as err:
-                print(err)
+                    print("installed '{}' here '{}'".format(
+                            archive_file,
+                            packages_home,
+                            arch,
+                            here
+                        )
+                    )
+
+                    PACKAGES[package.id()] = package
+                    status = True
+
+                except AssertionError as err:
+                    print(err)
+
     else:
-        print("artifact '{}' already deployed.")
+        print("package '{}' already deployed here '{}'.".format(
+            package.id(),
+            here))
+
+    return status
 
 def copy_package(archive, to):
     """
@@ -81,7 +104,7 @@ def copy_package(archive, to):
             check_integrity(source_archive, source_archive_digest)
             shutil.copy(source_archive, target_archive)
             shutil.copy(source_archive_digest, target_archive_digest)
-            print ("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+            print ("copied {} to {}".format(source_archive,to))
             status = True
 
         elif not package.artifact.is_snapshot():
@@ -89,14 +112,12 @@ def copy_package(archive, to):
                 check_integrity(source_archive, source_archive_digest)
                 shutil.copy(source_archive, target_archive)
                 shutil.copy(source_archive_digest, target_archive_digest)
-                print("copied {} to {}".format(os.path.join(dirname, package.archive()), os.path.join(to, package.archive())))
+                print("copied {} to {}".format(source_archive, to))
                 status = True
 
             else:
-                print ("package {} is stable and {} exists, {} will NOT be copied into {}".format(
+                print ("package '{}' found here '{}', the package is considered stable and will not be overwritten".format(
                     package.id(),
-                    target_archive,
-                    package.artifact.id(),
                     to
                 ))
 
@@ -105,7 +126,7 @@ def copy_package(archive, to):
 
     except Exception as err:
         print("function {}.copy_package('{}') failed, {}".format(__name__, archive, err))
-        raise Exception(err)
+        raise err
 
     return status
 
@@ -137,4 +158,9 @@ def check_integrity(archive_file, digest_file):
             md5_digest_calculator.update(bytes)
 
     source_md5_digest = md5_digest_calculator.hexdigest()
-    assert (source_md5_digest == target_md5_digest), "integrity control of '{}' failed (digest: '{}', expected: '{}')".format(archive_file,source_md5_digest, target_md5_digest)
+    assert (source_md5_digest == target_md5_digest), \
+        "integrity control of '{}' failed (digest: '{}', expected: '{}')".format(
+            archive_file,
+            source_md5_digest,
+            target_md5_digest
+        )

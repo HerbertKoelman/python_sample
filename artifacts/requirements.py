@@ -1,6 +1,11 @@
-import yaml
+# -*- coding: utf-8 -*-
+
 import os
+
+import yaml
+
 import artifacts
+
 
 def load_requirements_from(file):
     """
@@ -30,18 +35,22 @@ def load_yaml_reader(reader):
         requirements = data['requires']
 
         if isinstance(requirements, list):
-            for artifact in requirements:
-                if artifacts.Artifact(artifact) not in list_of_artifacts:
-                    list_of_artifacts.append(artifacts.Artifact(artifact))
+            for artifact_description in requirements:
+                artifact = artifacts.Artifact(artifact_description)
+                if artifact not in list_of_artifacts:
+                    list_of_artifacts.append(artifact)
 
         if isinstance(requirements, dict):
-            for artifact in requirements['stable']:
-                if artifacts.Artifact(artifact) not in list_of_artifacts:
-                    list_of_artifacts.append(artifacts.Artifact(artifact))
-
-            for artifact in requirements['snapshot']:
-                if artifacts.Artifact(artifact, build_type='snapshot') not in list_of_artifacts:
-                    list_of_artifacts.append(artifacts.Artifact(artifact, build_type='snapshot'))
+            if 'stable' in requirements.keys():
+                for artifact_description in requirements['stable']:
+                    artifact = artifacts.Artifact(artifact_description, build_type='stable')
+                    if artifact not in list_of_artifacts:
+                        list_of_artifacts.append(artifact)
+            if 'snapshot' in requirements.keys():
+                for artifact_description in requirements['snapshot']:
+                    artifact = artifacts.Artifact(artifact_description, build_type='snapshot')
+                    if artifact not in list_of_artifacts:
+                        list_of_artifacts.append(artifact)
 
     return list_of_artifacts
 
