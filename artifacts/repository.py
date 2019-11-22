@@ -34,6 +34,7 @@ def install_package(artifact, arch, here):
                       )
 
     package = artifacts.Package(artifact, target_arch=arch)
+
     if package.id() not in PACKAGES.keys():
         for packages_home in artifacts.PACKAGES_HOME_PATH:
             if package.id() not in PACKAGES.keys():
@@ -53,20 +54,25 @@ def install_package(artifact, arch, here):
                     with tarfile.open(archive_file, "r:gz") as archive_reader:
                         archive_reader.extractall(path=here)
 
-                    print("installed '{}' found here '{}' for '{}', here '{}'".format(package.artifact.id(),
-                                                                                      packages_home,
-                                                                                      arch,
-                                                                                      here))
+                    print("installed '{}' here '{}'".format(
+                            archive_file,
+                            packages_home,
+                            arch,
+                            here
+                        )
+                    )
+
                     PACKAGES[package.id()] = package
                     status = True
 
                 except AssertionError as err:
                     print(err)
+
     else:
-        print("artifact '{}' for architecture {} already deployed here '{}'.".format(
-            artifact.id(),
-            arch,
+        print("package '{}' already deployed here '{}'.".format(
+            package.id(),
             here))
+
     return status
 
 def copy_package(archive, to):
@@ -98,7 +104,7 @@ def copy_package(archive, to):
             check_integrity(source_archive, source_archive_digest)
             shutil.copy(source_archive, target_archive)
             shutil.copy(source_archive_digest, target_archive_digest)
-            print ("copied {} to {}".format(package.id(),target_archive))
+            print ("copied {} to {}".format(source_archive,to))
             status = True
 
         elif not package.artifact.is_snapshot():
@@ -106,11 +112,11 @@ def copy_package(archive, to):
                 check_integrity(source_archive, source_archive_digest)
                 shutil.copy(source_archive, target_archive)
                 shutil.copy(source_archive_digest, target_archive_digest)
-                print("copied {} to {}".format(package.id(), target_archive))
+                print("copied {} to {}".format(source_archive, to))
                 status = True
 
             else:
-                print ("stable package '{}' found here '{}', package will NOT be copied".format(
+                print ("package '{}' found here '{}', the package is considered stable and will not be overwritten".format(
                     package.id(),
                     to
                 ))
@@ -120,7 +126,7 @@ def copy_package(archive, to):
 
     except Exception as err:
         print("function {}.copy_package('{}') failed, {}".format(__name__, archive, err))
-        raise Exception(err)
+        raise err
 
     return status
 
@@ -152,4 +158,9 @@ def check_integrity(archive_file, digest_file):
             md5_digest_calculator.update(bytes)
 
     source_md5_digest = md5_digest_calculator.hexdigest()
-    assert (source_md5_digest == target_md5_digest), "integrity control of '{}' failed (digest: '{}', expected: '{}')".format(archive_file,source_md5_digest, target_md5_digest)
+    assert (source_md5_digest == target_md5_digest), \
+        "integrity control of '{}' failed (digest: '{}', expected: '{}')".format(
+            archive_file,
+            source_md5_digest,
+            target_md5_digest
+        )

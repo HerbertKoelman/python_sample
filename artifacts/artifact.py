@@ -13,42 +13,45 @@ class Artifact:
         """
         initialize an Artifact description instance.
 
+        we initialize an instance ethier by setting the attributes passed as parameters or by parsing the name string. the
+        parsing is triggered when the version parameter is None.
+
         :param name: artifact name or description string.
-        :param build_type: does this instance represent a stable or snapshot version
+        :param build_type: does this instance represent a stable or snapshot version (default is 'snapshot'
         :param version: artifact's semantic version number (semver)
-        :param os: the OS this artifact was built for.
-        :param source_arch: the CPU this artifact was instantiated (x86, armv7, ...)
-        :param description: a short description of what it does.
-
+        :param os: the OS this artifact was built for (can be None).
+        :param description: a short description of what it does (can be None).
         """
-        try:
-            assert name is not None, "missing name attribute/parameter, failed to initialize class Artefact."
 
-            self.name = name
-            self.os = os
-            self.description = description
-            self.build_type = build_type
+        self.name        = name
+        self.os          = os
+        self.description = description
+        self.build_type  = None # initialize attribute it will be set later
 
-            if version is None: # and build_type is None:
-               self.parse_artifact_description_string(name)
+        if version is None:
+           self.parse_description_string(name, build_type)
 
-            else:
-                self.version = semantic_version.Version(version)
+        else:
+            self.version    = semantic_version.Version(version)
+            self.build_type = self.check_build_type_value(build_type)
 
-            # TODO suppress this self.package = Package(self)
+        # TODO we might consider removing this test.
+        assert self.name is not None and self.version is not None and self.build_type is not None, \
+            "failed to initialize Artifact ({},{},{})".format(
+                name,
+                version,
+                build_type)
 
-            assert self.version is not None, "failed to set class Artefact's attribute version, initialization of Artefact {} failed".format(name)
-
-        except ValueError as err:
-            raise ValueError("failed to initialize artefact [{}], {}".format(name, err))
-
-    def parse_artifact_description_string(self, description_string):
+    def parse_description_string(self, description_string, build_type = None):
         """
         A description string should lok like this 'artifact_name[-os]-<sem ver version>[-snapshot]'.
 
         This string is parsed and each attr found is used to initialize class instance.
 
+        The build type parameter overides any value that was found in the descriptino string
+
         :param description_string: description string where each descirption is a token.
+        :param build_type: 'snapshot' or 'stable'
         :return: name, version, build_type, os
 
         """
@@ -57,56 +60,55 @@ class Artifact:
         number_of_tokens = len(tokens)
         last_token = number_of_tokens - 1
 
-        # init return variables
-        name       = ''
-        version    = None
-        build_type = None
-        os         = None
-
         # what token stores the version info ?
         version_position = 0
         for token in tokens:
             if semantic_version.validate(token):
-                version = semantic_version.Version(token)
+                self.version = semantic_version.Version(token)
                 break
 
             version_position += 1
 
-        # version is the last token, we shall consider
         if version_position == last_token:
-            tokens.pop(last_token)
+            tokens.pop() # remove last element
+            self.build_type = self.check_build_type_value('stable')
 
         # there is ONE token just after the version token, we will consider this to be the build type
         elif version_position == (last_token - 1):
-            build_type = tokens[last_token].lower()
-            assert build_type in Artifact.KNOWN_BUILD_TYPES, \
-                "in '{}' was found a build type '{}'}' which is not a valid value. Accepted values are {}".format(
-                    description_string,
-                    build_type,
-                    Artifact.KNOWN_BUILD_TYPES)
+            self.build_type = self.check_build_type_value(tokens[last_token].lower())
 
-            tokens.pop(last_token)
-            tokens.pop(last_token -1)
+            tokens.pop() # remove last element
+            tokens.pop() # remove last element
 
         if len(tokens) > 1:
             last_token = len(tokens) - 1
             if tokens[ last_token ] in artifacts.package.KNOWN_OS:
-                os = tokens[last_token]
-                tokens.pop(last_token)
+                self.os = tokens[last_token]
+                tokens.pop() # remove last element
 
         _sep = ''
+        self.name = '' # make sure that name is empty
         for token in tokens:
-            name += _sep + token
+            self.name += _sep + token
             _sep = seperator
 
-        assert name is not None and version is not None, "failed to parse artifact description string '{}'".format(description_string)
+        # if build_type parameter is given, then it ocerides the actual found value.
+        if build_type is not None: self.build_type = Artifact.check_build_type_value(build_type)
 
-        self.name = name
-        self.version=version
-        self.os = os
+    @staticmethod
+    def check_build_type_value(build_type):
 
-        if build_type is not None:
-            self.build_type = build_type
+        if build_type is None:
+            build_type = 'snapshot'
+        else:
+            build_type = build_type.lower()
+
+        assert build_type in Artifact.KNOWN_BUILD_TYPES, "artifact build type '{}' is not supported (expected to be in {})".format(
+            build_type,
+            Artifact.KNOWN_BUILD_TYPES
+        )
+
+        return build_type
 
     def id(self):
         """
@@ -138,22 +140,16 @@ class Artifact:
                 name=self.name,
                 version=self.version,
                 os=self.os,
-                build_type=self.build_type_display_name()
+                build_type=self.build_type
             )
         else:
             return "{name} / {version} (os: {os}, build type: {build_type}): {description}".format(
                 name=self.name,
                 version=self.version,
                 os=self.os,
-                build_type=self.build_type_display_name(),
+                build_type=self.build_type,
                 description=self.description
             )
-
-    def build_type_display_name(self):
-        if self.build_type is None:
-            return 'stable'
-        else:
-            return self.build_type
 
     def __str__(self):
         return self.id()
@@ -161,5 +157,6 @@ class Artifact:
     def __eq__(self, other):
         if isinstance(other, str):
             return self.id() == other
-        elif isinstance(other, Artifact):
-            return self.id() == other.id()
+        # TODO this can prabably be removed
+        # elif isinstance(other, Artifact):
+        #     return self.id() == other.id()
