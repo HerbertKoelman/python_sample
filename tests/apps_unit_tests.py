@@ -12,7 +12,6 @@ import artifacts.deploy_artifacts_app
 
 class apps_test_cases(unittest.TestCase):
 
-
     def setUp(self):
         self.workspace = tempfile.mkdtemp()
         self.repository = tempfile.mkdtemp()

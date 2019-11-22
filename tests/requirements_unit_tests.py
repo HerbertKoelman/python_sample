@@ -17,10 +17,10 @@ class requirements_test_cases(unittest.TestCase):
                 package = artifacts.Package(artefact, 'armv7')
                 # DEBUG print ("{}: {}".format(__name__, package.id()))
                 self.assertTrue(package.id() in expected_values,
-                                "Expect {} found in {} to be in {}".format(
-                                    package.id(),
-                                    path_to_yaml_file,
-                                    expected_values))
+                                "Expect {id} to be in {expected} ({path})".format(
+                                    id=package.id(),
+                                    path=path_to_yaml_file,
+                                    expected=expected_values))
 
     def test_load_from_text_file(self):
         path_to_text_file = 'tests/dependencies.txt'
