@@ -11,7 +11,7 @@ A plain software build is relying on
 1. source code (the one you write) 
 2. libraries that needs to be identified and versionned
 
-A software build might in turn produce a library used by yourself or someone else. The following figure illustrate the point.:w
+A software build might in turn produce a library used by yourself or someone else. The following figure illustrate the point.
 
 
 ```shell script
