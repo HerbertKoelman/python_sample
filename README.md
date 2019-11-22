@@ -11,7 +11,8 @@ A plain software build is relying on
 1. source code (the one you write) 
 2. libraries that needs to be identified and versionned
 
-A software build might in turn produce a library used by yourself or someone else.
+A software build might in turn produce a library used by yourself or someone else. The following figure illustrate the point.:w
+
 
 ```shell script
                     <source code>
@@ -24,7 +25,7 @@ A software build might in turn produce a library used by yourself or someone els
 ```
 
 This module comes as commands 
-- `artifact_copy` : move packages into your repository in safe way
+- `artifact-copy` : move packages into your repository in safe way
 - `artifact-deploy` : deploy packages listed in a requirment file into your workspace.
 
 # How to use it
@@ -57,7 +58,7 @@ Successfully installed artifacts-0.1
 
 # How it's done
 
-Requirements are usually listed in a file (YAMLor Text). Sample yaml requirement file
+Requirements are listed in a file in which the deploy command expects to find a root entry *requires*.
 
 ```yaml
 # This is a sample requirement files
@@ -70,16 +71,18 @@ requires:
     - snapshot-lib-qnx-1.2.3
 ```
 
-The command `artifact-deploy` uses such a yaml file to list the packages your project's requires. For each requirement, 
-the program expects to find a package named  this way `<name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz`. Where
+The command `artifact-deploy` uses such a yaml file to list the packages your project's requires. For each entry found, 
+the program expects to find an archive in one of the pathes listed by the variable `PACKAGES-HOME_PATH`. A package archive name
+is expected to have this form: `<name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz`.
+
+Where
 - name: speaks for itself
 - os: the operating system the package was built for (Darwin, ...) - optional
 - semver: semantic version (more on [semver](http://semver.org) here)
 - snapshot: build type (either snapshot or stable)
 - target arch: target CPU (x86, armv7, ...)
 
-`artifact-deploy` checks if the package is found in one of the pathes listed in the env variable `PACKAGES_HOME_PATH`. If 
-an occurence is found, a digest is calculated and checked against the content of a digest file (using MD5).
+When `artifact-deploy` finds a package, a digest is calculated and checked against the content of a digest file (using MD5).
 
 > **WARN** a digest file is expected to be named `<name>[-<os>]-<semver>[-snapshot]-<target arch>.tar.gz.md5` and MUST 
 > exist.
@@ -87,7 +90,6 @@ an occurence is found, a digest is calculated and checked against the content of
 ```shell script
 $ artifact-deploy --install-dir /your/workspace --target-arch x86 requirements.yml 
 deploy artifacts found in ['requirements.yml'] here /tmp/deps
---------------  requirements.yml  -----------------
 installed 'artifact-qnx-2.3.4-snapshot' found here '/your/repsitory' for 'x86', here '/your/workspace'
 artifact-deploy deployed 1 artifacts.
 $
