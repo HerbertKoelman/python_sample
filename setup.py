@@ -33,7 +33,7 @@ setup(
         ]
     },
 
-    install_requires=['PyYAML==5.1.2', 'semantic-version==2.8.2'],
+    install_requires=['PyYAML==5.4', 'semantic-version==2.8.2'],
 
     author="Herbert Koelman",
     author_email="herbert.koelman@me.com",
